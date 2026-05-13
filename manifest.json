@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Data Hunter v18.0 - AutoSave",
+  "version": "18.0",
+  "description": "Otomatik yedekleme ve sekmeli kara liste özellikli veri avcısı.",
+  "permissions": ["storage", "activeTab", "scripting", "alarms", "downloads", "contextMenus"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}
