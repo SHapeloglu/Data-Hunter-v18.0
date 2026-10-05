@@ -1,21 +1,16 @@
-# backlog.md — Data-Hunter-v18.0 Fikir / Özellik Havuzu
+# backlog.md — Data Hunter Fikir Havuzu
 
-Bu dosya henüz önceliklendirilmemiş, "bir gün yapılabilir" fikirler ve özellik talepleri içindir. Bir fikir somutlaşıp sıraya girdiğinde buradan çıkar, `task.md`ye taşınır.
-
-## Fikirler
-
-_(henüz boş — yeni bir fikir geldiğinde aşağıdaki şablonla ekle)_
-
-## Koddaki TODO / FIXME Notları
-
-_(kodda TODO/FIXME notu bulunamadı)_
+- Kara listede tam domain eşleşmesi seçeneği (alt dize yerine `endsWith('@'+d)` / host eşleşmesi).
+- Sadece izin verilen sitelerde çalışma modu (whitelist) — `<all_urls>` yerine isteğe bağlı host izni.
+- Büyük listelerde performans: `emailData` için `Set` tabanlı tekrar kontrolü (şu an `some()` ile O(n²)).
+- MailFinder / MailSenderVerifier'a doğrudan aktarım (CSV yerine API).
+- Toplanan adreslerde basit sözdizimi/MX kontrolü (yanlış pozitifleri azaltmak için, ör. `image@2x.png`).
 
 ## Ekleme Şablonu
 
 ```markdown
 ### Başlık
-
 - **Kategori:** yeni özellik / iyileştirme / teknik borç / araştırma
-- **Neden istendi:** kısa gerekçe
-- **Notlar:** büyüklük tahmini, bağımlılıklar, riskler
+- **Neden:** kısa gerekçe
+- **Notlar:** büyüklük, bağımlılıklar, riskler
 ```

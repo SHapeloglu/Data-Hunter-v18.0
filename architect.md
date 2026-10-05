@@ -1,44 +1,33 @@
-# architect.md — Data-Hunter-v18.0 Mimari Referansı
-
-Bu dosya projenin yapısının hızlı-referans özetidir. Kod değiştikçe güncel tutun.
-
-## Genel Bakış
-
-_README'de açıklama bulunamadı. Projenin amacını buraya bir-iki cümleyle yazın._
-
-## Teknoloji Yığını
-
-- Statik HTML/CSS/JS
-
-## Dizin Yapısı
+# architect.md — Data Hunter v18 Mimarisi
 
 ```
-background.js
-content.7z
-content.js
-manifest.json
-popup.html
-popup.js
+Her sayfa ── content.js (yükleme + scroll debounce 1.5s)
+               │ regex: e-posta, mailto:, URL (onlyEmails kapalıysa)
+               │ filtre: isActive, blockedDomains, domainFilter, tekrar kontrolü
+               ▼
+        chrome.storage.local.emailData ──REFRESH_UI mesajı──► popup.js (liste, kara liste, ayarlar)
+               ▲                                                 ├─ CSV indir (Blob)
+background.js ─┤ contextMenus "addManualEmail" (seçili metin)     ├─ mailto:?bcc=…
+               └ alarms "autoSaveAlarm" → data:text/csv;base64 → chrome.downloads (ops. sonra listeyi temizle)
 ```
 
-## Modüller / Kaynak Dosyalar
+## Depolama Anahtarları (`chrome.storage.local`)
 
-- `background.js` — background.js - v18.1 (Geliştirilmiş Kayıt Sistemi)
-- `content.js` — content.js - v18.3 (Gelişmiş Filtreleme)
-- `popup.js` — popup.js - v18.0 (Geliştirilmiş Kara Liste)
-
-## Giriş Noktaları ve Yapılandırma
-
-_(belirgin giriş noktası bulunamadı)_
-
-## Dağıtım / Çalışma Ortamı
-
-- GitHub: https://github.com/SHapeloglu/Data-Hunter-v18.0
-
-## Diğer Dokümanlar
-
-_(yok)_
+| Anahtar | Tip | Varsayılan | Kullanan |
+|---|---|---|---|
+| `emailData` | `[{email, type, source, date}]` | `[]` | hepsi |
+| `isActive` | bool | true | content, popup |
+| `onlyEmails` | bool | false | content, popup |
+| `domainFilter` | string | "" | content (e-postada `includes`) |
+| `blockedDomains` | string[] | [] | content, popup (eklerken mevcut eşleşenler listeden silinir) |
+| `scanSpeed` | string | "0" | sadece popup (kullanılmıyor) |
+| `mailBody` | string | "" | popup (mailto gövdesi) |
+| `autoSaveActive` | bool | false | popup, background |
+| `autoSaveInterval` | number (dk) | 5 | popup → `chrome.alarms.create(periodInMinutes)` |
+| `autoClearAfterSave` | bool | false | background |
 
 ## Mimari Kararlar
 
-_Önemli tasarım kararlarını ve gerekçelerini buraya ekleyin (ör. "X yerine Y seçildi çünkü ...")._
+- **Tüm sayfalarda pasif tarama**: kullanıcı müdahalesi olmadan toplama (v18 "AutoSave" teması).
+- **Kara liste = alt dize eşleşmesi**: hem domain hem kelime engellemeye yarıyor; ama kısa girdiler (ör. "co") geniş eşleşir.
+- **Otomatik yedek data URL ile**: MV3 service worker'da `URL.createObjectURL` olmadığı için base64 `data:` URL.

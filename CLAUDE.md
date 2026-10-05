@@ -1,40 +1,28 @@
-# CLAUDE.md
+# CLAUDE.md — Data Hunter v18 (Chrome eklentisi)
 
-Bu dosya, bu proje üzerinde çalışırken Claude'un (Claude Code dahil) izlemesi gereken bağlamı ve kuralları içerir.
+Ziyaret edilen sayfalardan e-posta adreslerini (ve isteğe bağlı web adreslerini) otomatik toplayan Manifest V3 eklentisi. Kara liste (domain/kelime), domain filtresi, sağ tıkla manuel ekleme, CSV dışa aktarma, periyodik otomatik CSV yedeği ve toplu `mailto:` (BCC) özelliği var.
 
-## Proje
+- GitHub: https://github.com/SHapeloglu/Data-Hunter-v18.0 (tek commit, 2026-05-13)
+- Mimari: `architect.md` · Görevler: `task.md` · Fikirler: `backlog.md` · Günlük: `session.md`
 
-**Data-Hunter-v18.0** — _README'de açıklama bulunamadı. Projenin amacını buraya bir-iki cümleyle yazın._
+## Çalıştırma
 
-- GitHub: https://github.com/SHapeloglu/Data-Hunter-v18.0
+Derleme yok. `chrome://extensions` → Geliştirici modu → "Paketlenmemiş öğe yükle" → bu klasör. Kod değişince eklentiyi yeniden yükle **ve açık sekmeleri yenile** (content script sadece sayfa yüklenince enjekte olur).
 
-## Teknoloji Yığını
+## Dosyalar
 
-- Statik HTML/CSS/JS
+- `manifest.json` — izinler: `storage, activeTab, scripting, alarms, downloads, contextMenus`; content script `<all_urls>`.
+- `content.js` — sayfa HTML'inden regex ile e-posta + `mailto:` linkleri + (ops.) URL toplar; ilk yüklemede ve kaydırma durduktan 1,5 sn sonra çalışır.
+- `background.js` — sağ tık menüsü ("Data Hunter'a Ekle"), `autoSaveAlarm` ile otomatik CSV indirme.
+- `popup.html` / `popup.js` — sekmeli arayüz (avcı listesi / kara liste / ayarlar), CSV indirme, `mailto:` BCC.
+- `content.7z` — `content.js`'in eski bir arşiv kopyası; kullanılmıyor.
 
-## Önemli Dosyalar
+## Kurallar ve Tuzaklar
 
-_(belirgin giriş noktası bulunamadı)_
-
-Mimari ayrıntılar için bkz. `architect.md`.
-
-## Sık Kullanılan Komutlar
-
-```bash
-# Henüz belgelenmiş komut yok — kurulum/çalıştırma adımlarını buraya ekleyin.
-```
-
-## Kurallar
-
-- `.env`, parola, token ve API anahtarlarını asla commit etme.
-- Her çalışma oturumunun sonunda `session.md`ye kısa kayıt düş; görev durumunu `task.md`de güncelle.
-- Önceliklendirilmemiş fikirleri `backlog.md`ye yaz; somutlaşınca `task.md`ye taşı.
-
-## Çalışma Dosyaları
-
-| Dosya | Amaç |
-|---|---|
-| `architect.md` | Mimari ve dizin yapısı referansı |
-| `task.md` | Aktif / devam eden / tamamlanan görevler |
-| `backlog.md` | Önceliklendirilmemiş fikir ve teknik borç havuzu |
-| `session.md` | Oturum günlüğü — her oturum sonunda güncellenir |
+- Tüm durum `chrome.storage.local`'da (anahtarlar `architect.md`'de). Yeni ayar eklerken `popup.js:updateUI` içindeki varsayılan nesneye de ekle.
+- `emailData[].email` alanı hem e-posta hem URL tutuyor; tür `type` ile ayrılıyor (`"E-Posta"` | `"Web Sitesi"`) — bu Türkçe dizeler karşılaştırmada kullanılıyor, değiştirme.
+- CSV ayracı `;` ve UTF-8 BOM'lu (Türkçe Excel uyumu); CSV üretimi `popup.js` ve `background.js`'te **iki kez** yazılmış — birini değiştirirsen diğerini de.
+- `scanSpeed` ("vites") ayarı kaydediliyor ama `content.js` kullanmıyor.
+- Popup'ta toplanan adresler `innerHTML` ile basılıyor → kötü niyetli sayfa içeriği popup'ta HTML olarak çalışabilir; `textContent` tercih et.
+- Toplanan veriler kişisel veri: KVKK/GDPR ve toplu e-posta mevzuatı (izinsiz ticari ileti) kullanıcının sorumluluğunda — özellik eklerken bunu genişletici değil, kontrol edici yönde düşün.
+- Oturum sonunda `session.md`'ye kayıt düş, `task.md`'yi güncelle.
