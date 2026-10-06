@@ -1,4 +1,4 @@
-// popup.js - v18.0 (Geliştirilmiş Kara Liste)
+// popup.js - v18.1 (Telefon + Sosyal Medya)
 let emails = [];
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -13,7 +13,8 @@ function updateUI() {
   chrome.storage.local.get({
     emailData: [], isActive: true, onlyEmails: false,
     scanSpeed: "0", domainFilter: "", mailBody: "", blockedDomains: [],
-    autoSaveActive: false, autoSaveInterval: 5, autoClearAfterSave: false
+    autoSaveActive: false, autoSaveInterval: 5, autoClearAfterSave: false,
+    capturePhones: false, captureSocial: false
   }, (res) => {
     emails = res.emailData;
     document.getElementById('totalCount').innerText = emails.length;
@@ -25,11 +26,20 @@ function updateUI() {
     document.getElementById('autoSaveActive').checked = res.autoSaveActive;
     document.getElementById('autoSaveInterval').value = res.autoSaveInterval;
     document.getElementById('autoClearAfterSave').checked = res.autoClearAfterSave;
+    document.getElementById('capturePhones').checked = res.capturePhones;
+    document.getElementById('captureSocial').checked = res.captureSocial;
     
     renderHunter(emails, res.onlyEmails);
     renderBlacklist(res.blockedDomains);
   });
 }
+
+const BADGES = {
+  "E-Posta": { label: "MAIL", color: "#673ab7" },
+  "Web Sitesi": { label: "WEB", color: "#ff9800" },
+  "Telefon": { label: "TEL", color: "#00897b" },
+  "Sosyal Medya": { label: "SOSYAL", color: "#1e88e5" }
+};
 
 function renderHunter(data, onlyEmailsActive) {
   const div = document.getElementById('listE');
@@ -38,15 +48,32 @@ function renderHunter(data, onlyEmailsActive) {
   displayData.reverse().forEach(item => {
     const el = document.createElement('div');
     el.className = 'item';
-    const domain = item.email.includes('@') ? item.email.split('@')[1] : item.email.replace('www.', '').split('/')[0];
+    // ✖ ile kara listeye alınacak anahtar: e-postada domain, sitede host, telefon/sosyalde değerin kendisi
+    let domain;
+    if (item.type === "E-Posta") domain = item.email.split('@')[1];
+    else if (item.type === "Web Sitesi") domain = item.email.replace(/^https?:\/\//, '').replace('www.', '').split('/')[0];
+    else domain = item.email;
     const blockBtn = document.createElement('button');
-    blockBtn.innerHTML = "✖";
+    blockBtn.textContent = "✖";
     blockBtn.style.cssText = "padding: 2px 8px; font-size: 10px; border: 1px solid #d32f2f; background: #fff; color: #d32f2f; border-radius: 4px; cursor: pointer;";
     blockBtn.onclick = () => toggleBlock(domain);
     const info = document.createElement('div');
     info.style.flex = "1";
-    const color = item.type === "Web Sitesi" ? "#ff9800" : "#673ab7";
-    info.innerHTML = `<span style="background:${color}; color:white; padding:1px 4px; border-radius:3px; font-size:9px;">${item.type === "Web Sitesi" ? "WEB" : "MAIL"}</span> <strong style="font-size:11px;">${item.email}</strong>`;
+    const badge = BADGES[item.type] || BADGES["E-Posta"];
+    // Toplanan değerler sayfadan geliyor: innerHTML yerine textContent (XSS)
+    const tag = document.createElement('span');
+    tag.style.cssText = `background:${badge.color}; color:white; padding:1px 4px; border-radius:3px; font-size:9px;`;
+    tag.textContent = item.type === "Sosyal Medya" && item.platform ? item.platform.toUpperCase() : badge.label;
+    const value = document.createElement('strong');
+    value.style.fontSize = "11px";
+    value.textContent = item.email;
+    info.append(tag, " ", value);
+    if (item.company) {
+      const firm = document.createElement('div');
+      firm.style.cssText = "font-size:10px; color:#777; margin-top:1px;";
+      firm.textContent = "🏢 " + item.company;
+      info.appendChild(firm);
+    }
     info.onclick = () => { navigator.clipboard.writeText(item.email); alert("Kopyalandı!"); };
     el.appendChild(blockBtn);
     el.appendChild(info);
@@ -60,9 +87,12 @@ function renderBlacklist(blocked) {
   blocked.forEach(domain => {
     const el = document.createElement('div');
     el.className = 'item';
-    el.innerHTML = `<span style="font-size:11px; color:#d32f2f; font-weight:bold;">${domain}</span>`;
+    const label = document.createElement('span');
+    label.style.cssText = "font-size:11px; color:#d32f2f; font-weight:bold;";
+    label.textContent = domain;
+    el.appendChild(label);
     const undoBtn = document.createElement('button');
-    undoBtn.innerHTML = "Engeli Kaldır";
+    undoBtn.textContent = "Engeli Kaldır";
     undoBtn.style.cssText = "padding: 3px 8px; font-size: 9px; background: #eee; color: #333; border: 1px solid #ccc; border-radius: 3px;";
     undoBtn.onclick = () => toggleBlock(domain);
     el.appendChild(undoBtn);
@@ -133,6 +163,9 @@ document.getElementById('autoClearAfterSave').onchange = (e) => {
   chrome.storage.local.set({ autoClearAfterSave: e.target.checked });
 };
 
+document.getElementById('capturePhones').onchange = (e) => chrome.storage.local.set({ capturePhones: e.target.checked });
+document.getElementById('captureSocial').onchange = (e) => chrome.storage.local.set({ captureSocial: e.target.checked });
+
 document.getElementById('activeStatus').onchange = (e) => chrome.storage.local.set({ isActive: e.target.checked });
 document.getElementById('onlyEmailsStatus').onchange = (e) => chrome.storage.local.set({ onlyEmails: e.target.checked }, () => updateUI());
 ['vites', 'domainFilter', 'mailBody'].forEach(id => {
@@ -140,17 +173,19 @@ document.getElementById('onlyEmailsStatus').onchange = (e) => chrome.storage.loc
 });
 
 document.getElementById('mailBtn').onclick = () => {
-    const list = emails.filter(e => e.type !== "Web Sitesi").map(e => e.email).join(',');
+    const list = emails.filter(e => e.type === "E-Posta").map(e => e.email).join(',');
     if(list) window.location.href = `mailto:?bcc=${list}&body=${encodeURIComponent(document.getElementById('mailBody').value)}`;
 };
 
-document.getElementById('dlBtn').onclick = () => {
-  let csv = "\uFEFFEmail;Tip;Kaynak;Tarih\n" + emails.map(e => `${e.email};${e.type};${e.source};${e.date}`).join('\n');
+function downloadCsv(csv, filename) {
   const link = document.createElement("a");
   link.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-  link.download = "DataHunter_v18.csv";
+  link.download = filename;
   link.click();
-};
+}
+
+document.getElementById('dlBtn').onclick = () => downloadCsv(DH.buildCsv(emails), "DataHunter_v18.csv");
+document.getElementById('dlCompanyBtn').onclick = () => downloadCsv(DH.buildCompanyCsv(emails), "DataHunter_Firmalar.csv");
 
 chrome.runtime.onMessage.addListener(m => m.type === "REFRESH_UI" && updateUI());
 updateUI();
