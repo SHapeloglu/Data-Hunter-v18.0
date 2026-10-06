@@ -1,8 +1,9 @@
 # CLAUDE.md — Data Hunter v18 (Chrome eklentisi)
 
-Ziyaret edilen sayfalardan e-posta adreslerini (ve isteğe bağlı web adreslerini) otomatik toplayan Manifest V3 eklentisi. Kara liste (domain/kelime), domain filtresi, sağ tıkla manuel ekleme, CSV dışa aktarma, periyodik otomatik CSV yedeği ve toplu `mailto:` (BCC) özelliği var.
+Ziyaret edilen sayfalardan e-posta adreslerini (isteğe bağlı web adreslerini, telefon numaralarını ve sosyal medya hesaplarını, firma adıyla eşleştirerek) otomatik toplayan Manifest V3 eklentisi. Kara liste (domain/kelime), domain filtresi, sağ tıkla manuel ekleme, CSV dışa aktarma, periyodik otomatik CSV yedeği ve toplu `mailto:` (BCC) özelliği var.
 
-- GitHub: https://github.com/SHapeloglu/Data-Hunter-v18.0 (tek commit, 2026-05-13)
+- GitHub: https://github.com/SHapeloglu/Data-Hunter-v18.0 — v18.0 2026-05-13; telefon/sosyal/firma eşleştirme PR #1 ile 2026-10-06'da `main`'e girdi
+- Kullanım: oda ve dernek üye rehberlerinden firma iletişim bilgisi toplama. Kaldığımız yer için önce `session.md`'nin en üst kaydını oku.
 - Mimari: `architect.md` · Görevler: `task.md` · Fikirler: `backlog.md` · Günlük: `session.md`
 
 ## Çalıştırma
