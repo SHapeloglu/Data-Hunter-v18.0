@@ -6,7 +6,8 @@
 **Yapılanlar:** Telefon + sosyal medya yakalama eklendi (`extractors.js` yeni ortak dosya). Ayarlar'a iki anahtar (`capturePhones`, `captureSocial`), listede TEL / platform rozetleri. Popup `innerHTML` → `textContent`. CSV tek fonksiyonda, kaçışlı; telefon `="+90…"` olarak yazılıyor (Excel baştaki +/0'ı silmesin). Toplu mailto artık yalnız e-postaları alıyor (önceden "Web Sitesi" dışındaki her şeyi alıyordu). Web sitesi için ✖ düğmesi `https:`'yi kara listeye ekliyordu, host'u ekleyecek şekilde düzeltildi.
 **Kararlar / neden:** Yeni türler varsayılan kapalı (KVKK). Sosyal hesaplar yalnız gerçek `<a href>` bağlantılarından, paylaş/intent/gönderi linkleri hariç. Telefon serbest metinde `innerText`'ten (script içi rakamlar yakalanmasın).
 **Test:** Node ile birim test (TR/uluslararası numaralar, tarih/fiyat/IBAN reddi, platform linkleri) + başsız Chromium'da eklenti yüklenip test sayfasında uçtan uca doğrulandı.
-**Açık sorunlar:** Domain filtresi yalnız e-postalara uygulanıyor. `wa.me` linki "Sadece e-posta" kapalıyken ayrıca "Web Sitesi" olarak da düşüyor. CSV başlığı geriye uyum için hâlâ `Email`.
+**Ek düzeltme (oda/dernek rehberleri için):** Aynı satırdaki "0212 … - 0212 …" numaraları birleşip ikisi de kayboluyordu → ayraçlarda bölünüyor. "Faks/Fax" etiketli numaralar atlanıyor. "Tel: 212 123 45 67" gibi başında 0 olmayan numaralar yalnız telefon etiketinden sonra alınıyor.
+**Açık sorunlar:** Rehber sayfalarında bir sayfada çok firma var; kayıtlar firma adıyla eşleşmiyor (kaynak = sayfa başlığı). Domain filtresi yalnız e-postalara uygulanıyor. `wa.me` linki "Sadece e-posta" kapalıyken ayrıca "Web Sitesi" olarak da düşüyor. CSV başlığı geriye uyum için hâlâ `Email`.
 
 ---
 

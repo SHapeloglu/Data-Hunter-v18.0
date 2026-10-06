@@ -26,12 +26,25 @@ var DH = (() => {
     return out;
   }
 
+  const faxLabelRegEx = /fa(?:ks|x)\.?\s*(?:no)?\s*:?\s*$/i;
+  const phoneLabelRegEx = /(?:tel|telefon|phone|gsm|cep)\.?\s*(?:no)?\s*:?\s*$/i;
+
   function findPhonesInText(text) {
     const found = [];
-    (text.match(phoneCandidateRegEx) || []).forEach(m => {
-      const p = normalizePhone(m, true);
+    // "0212 123 45 67 - 0212 123 45 69" gibi listeler tek aday olarak birleşmesin
+    const src = text.replace(/[ \t ]+[-–\/|][ \t ]+/g, "\n");
+    let m;
+    phoneCandidateRegEx.lastIndex = 0;
+    while ((m = phoneCandidateRegEx.exec(src))) {
+      const before = src.slice(Math.max(0, m.index - 15), m.index);
+      if (faxLabelRegEx.test(before)) continue;                       // faks numaralarını atla
+      let p = normalizePhone(m[0], true);
+      // "Tel: 212 123 45 67" — başında 0 yok ama etiket telefon olduğunu söylüyor
+      if (!p && phoneLabelRegEx.test(before) && /^[2-58]\d{9}$/.test(m[0].replace(/\D/g, ""))) {
+        p = "+90" + m[0].replace(/\D/g, "");
+      }
       if (p && !found.includes(p)) found.push(p);
-    });
+    }
     return found;
   }
 
