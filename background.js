@@ -1,4 +1,5 @@
-// background.js - v18.1 (Geliştirilmiş Kayıt Sistemi)
+// background.js - v18.2 (Telefon + Sosyal Medya, ortak CSV)
+importScripts("extractors.js");
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
@@ -12,17 +13,25 @@ chrome.runtime.onInstalled.addListener(() => {
 // Sağ tık menüsü
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "addManualEmail") {
-    const selectedText = info.selectionText.trim().toLowerCase();
+    const rawText = info.selectionText.trim();
+    const selectedText = rawText.toLowerCase();
     const isEmail = selectedText.includes("@");
-    const isUrl = selectedText.includes("www.") || selectedText.includes("http");
+    const social = !isEmail && DH.parseSocial(rawText);
+    const isUrl = !social && (selectedText.includes("www.") || selectedText.includes("http"));
+    const phone = !isEmail && !social && !isUrl && DH.normalizePhone(rawText, false);
 
-    if (isEmail || isUrl) {
+    let entry = null;
+    if (isEmail) entry = { email: selectedText, type: "E-Posta" };
+    else if (social) entry = { email: social.value, type: "Sosyal Medya", platform: social.platform };
+    else if (isUrl) entry = { email: selectedText, type: "Web Sitesi" };
+    else if (phone) entry = { email: phone, type: "Telefon" };
+
+    if (entry) {
       chrome.storage.local.get({emailData: []}, (res) => {
         let dataList = res.emailData;
-        if (!dataList.some(e => e.email === selectedText)) {
+        if (!dataList.some(e => e.email === entry.email)) {
           dataList.push({
-            email: selectedText,
-            type: isEmail ? "E-Posta" : "Web Sitesi",
+            ...entry,
             source: "Manuel: " + (tab.title || "Sayfa"),
             date: new Date().toLocaleDateString()
           });
@@ -56,8 +65,7 @@ async function handleAutoSave() {
     }
 
     // CSV içeriğini oluştur (Excel dostu olması için UTF-8 BOM ekliyoruz)
-    let csvContent = "\uFEFFEmail;Tip;Kaynak;Tarih\n" + 
-                     res.emailData.map(e => `${e.email};${e.type};${e.source};${e.date}`).join('\n');
+    const csvContent = DH.buildCsv(res.emailData);
     
     // Doğrudan Base64 formatına çeviriyoruz (Daha kararlı çalışır)
     const base64Data = btoa(unescape(encodeURIComponent(csvContent)));

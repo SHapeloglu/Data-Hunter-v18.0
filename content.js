@@ -1,10 +1,12 @@
-// content.js - v18.3 (Gelişmiş Filtreleme)
+// content.js - v18.4 (Telefon + Sosyal Medya; yardımcılar extractors.js'te)
 async function captureData() {
   chrome.storage.local.get({
     isActive: true, 
     onlyEmails: false, 
     domainFilter: "", 
-    blockedDomains: [] 
+    blockedDomains: [],
+    capturePhones: false,
+    captureSocial: false
   }, async (status) => {
     
     if (!status.isActive) return;
@@ -32,6 +34,25 @@ async function captureData() {
     }
 
     const foundUrls = status.onlyEmails ? [] : (htmlContent.match(urlRegEx) || []);
+
+    // Telefon: tel:/WhatsApp linkleri + görünür metin (innerHTML'deki script/ID rakamlarını atlamak için innerText)
+    let foundPhones = [];
+    if (status.capturePhones) {
+      foundPhones = DH.findPhonesInText(document.body ? document.body.innerText : "");
+      for (let i = 0; i < allLinks.length; i++) {
+        const p = DH.phoneFromHref(allLinks[i].href);
+        if (p && !foundPhones.includes(p)) foundPhones.push(p);
+      }
+    }
+
+    // Sosyal medya: yalnızca gerçek bağlantılardaki profil adresleri
+    let foundSocial = [];
+    if (status.captureSocial) {
+      for (let i = 0; i < allLinks.length; i++) {
+        const s = DH.parseSocial(allLinks[i].href);
+        if (s && !foundSocial.some(x => x.value === s.value)) foundSocial.push(s);
+      }
+    }
     
     chrome.storage.local.get({emailData: []}, (result) => {
       let dataList = result.emailData;
@@ -58,10 +79,40 @@ async function captureData() {
         let cleanUrl = url.toLowerCase().trim().replace(/[.,;:"'<>]$/g, "");
         const isBlocked = status.blockedDomains.some(d => cleanUrl.includes(d));
         
-        if (!cleanUrl.includes("@") && !isBlocked && !dataList.some(e => e.email === cleanUrl)) {
+        // Sosyal medya yakalama açıksa o profiller "Web Sitesi" olarak ikinci kez eklenmesin
+        const isSocial = status.captureSocial && DH.parseSocial(cleanUrl);
+        
+        if (!cleanUrl.includes("@") && !isBlocked && !isSocial && !dataList.some(e => e.email === cleanUrl)) {
           dataList.push({ 
             email: cleanUrl, 
             type: "Web Sitesi", 
+            source: pageTitle, 
+            date: new Date().toLocaleDateString() 
+          });
+          isChanged = true;
+        }
+      });
+
+      foundPhones.forEach(phone => {
+        const isBlocked = status.blockedDomains.some(d => phone.includes(d));
+        if (!isBlocked && !dataList.some(e => e.email === phone)) {
+          dataList.push({ 
+            email: phone, 
+            type: "Telefon", 
+            source: pageTitle, 
+            date: new Date().toLocaleDateString() 
+          });
+          isChanged = true;
+        }
+      });
+
+      foundSocial.forEach(s => {
+        const isBlocked = status.blockedDomains.some(d => s.value.toLowerCase().includes(d));
+        if (!isBlocked && !dataList.some(e => e.email === s.value)) {
+          dataList.push({ 
+            email: s.value, 
+            type: "Sosyal Medya", 
+            platform: s.platform,
             source: pageTitle, 
             date: new Date().toLocaleDateString() 
           });

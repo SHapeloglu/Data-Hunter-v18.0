@@ -1,11 +1,13 @@
 # Data Hunter v18 — AutoSave (Chrome eklentisi)
 
-Gezdiğiniz web sayfalarındaki **e-posta adreslerini** (ve isteğe bağlı olarak **web adreslerini**) otomatik toplayan, listeleyen ve CSV olarak dışa aktaran Manifest V3 tarayıcı eklentisi.
+Gezdiğiniz web sayfalarındaki **e-posta adreslerini** (isteğe bağlı olarak **web adreslerini**, **telefon numaralarını** ve **sosyal medya hesaplarını**) otomatik toplayan, listeleyen ve CSV olarak dışa aktaran Manifest V3 tarayıcı eklentisi.
 
 ## Özellikler
 
 - Sayfa açıldığında ve kaydırma durduğunda sayfa içeriğinden e-posta ve `mailto:` bağlantılarını toplar.
 - "Sadece e-posta" modu (web adreslerini atlar).
+- **Telefon numaraları** (Ayarlar'dan açılır, varsayılan kapalı) — `tel:` / WhatsApp bağlantıları ve sayfa metnindeki `+90 5xx…`, `0212 …`, `+44 …` gibi numaralar; `+905321234567` biçimine çevrilir.
+- **Sosyal medya hesapları** (Ayarlar'dan açılır, varsayılan kapalı) — Instagram, Facebook, X/Twitter, LinkedIn, YouTube, TikTok, Telegram profil bağlantıları (paylaş butonları hariç).
 - **Domain filtresi** — yalnız belirli bir alan adını içeren adresleri topla.
 - **Kara liste** — istenmeyen alan adlarını/kelimeleri engelle; listeden tek tıkla ekle veya elle gir.
 - **Sağ tık → "Data Hunter'a Ekle"** ile seçili metni elle ekleme.
@@ -25,7 +27,7 @@ Gezdiğiniz web sayfalarındaki **e-posta adreslerini** (ve isteğe bağlı olar
 |---|---|
 | Avcı | Toplanan adresler, sayaç, aktif/pasif, sadece e-posta, domain filtresi, CSV indir, temizle, mail taslağı |
 | Kara liste | Engellenen alan adları; "Engeli Kaldır" |
-| Ayarlar | Otomatik yedek aç/kapa, aralık (dk), yedekten sonra temizle |
+| Ayarlar | Telefon / sosyal medya yakalama, otomatik yedek aç/kapa, aralık (dk), yedekten sonra temizle |
 
 Listedeki bir adrese tıklamak onu panoya kopyalar; ✖ düğmesi o alan adını kara listeye alır.
 
@@ -40,6 +42,7 @@ Listedeki bir adrese tıklamak onu panoya kopyalar; ✖ düğmesi o alan adını
 | Dosya | Görev |
 |---|---|
 | `manifest.json` | Eklenti tanımı ve izinler |
+| `extractors.js` | Ortak yardımcılar: telefon/sosyal medya ayrıştırma, CSV üretimi |
 | `content.js` | Sayfadan adres toplama |
 | `background.js` | Sağ tık menüsü ve otomatik CSV yedeği |
 | `popup.html`, `popup.js` | Arayüz |
