@@ -22,7 +22,8 @@ Derleme yok. `chrome://extensions` → Geliştirici modu → "Paketlenmemiş ö�
 
 - Tüm durum `chrome.storage.local`'da (anahtarlar `architect.md`'de). Yeni ayar eklerken `popup.js:updateUI` içindeki varsayılan nesneye de ekle.
 - `emailData[].email` alanı e-posta, URL, telefon ve sosyal profil tutuyor; tür `type` ile ayrılıyor (`"E-Posta"` | `"Web Sitesi"` | `"Telefon"` | `"Sosyal Medya"` + `platform`) — bu Türkçe dizeler karşılaştırmada kullanılıyor, değiştirme.
-- CSV ayracı `;` ve UTF-8 BOM'lu (Türkçe Excel uyumu); üretim tek yerde: `extractors.js:buildCsv`.
+- CSV ayracı `;` ve UTF-8 BOM'lu (Türkçe Excel uyumu); üretim tek yerde: `extractors.js:buildCsv` (değer başına) ve `buildCompanyCsv` (firma başına).
+- Firma adı `content.js:findRecord/nameFromRecord` sezgisiyle bulunuyor (`<tr>` / tekrarlayan kart / detay sayfasında `<h1>`); `emailData[].company` boş olabilir.
 - `scanSpeed` ("vites") ayarı kaydediliyor ama `content.js` kullanmıyor.
 - Popup'ta toplanan değerleri her zaman `textContent` ile bas (sayfa içeriği güvenilmez).
 - Toplanan veriler kişisel veri: KVKK/GDPR ve toplu e-posta mevzuatı (izinsiz ticari ileti) kullanıcının sorumluluğunda — özellik eklerken bunu genişletici değil, kontrol edici yönde düşün.

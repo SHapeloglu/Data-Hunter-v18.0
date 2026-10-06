@@ -68,6 +68,12 @@ function renderHunter(data, onlyEmailsActive) {
     value.style.fontSize = "11px";
     value.textContent = item.email;
     info.append(tag, " ", value);
+    if (item.company) {
+      const firm = document.createElement('div');
+      firm.style.cssText = "font-size:10px; color:#777; margin-top:1px;";
+      firm.textContent = "🏢 " + item.company;
+      info.appendChild(firm);
+    }
     info.onclick = () => { navigator.clipboard.writeText(item.email); alert("Kopyalandı!"); };
     el.appendChild(blockBtn);
     el.appendChild(info);
@@ -171,13 +177,15 @@ document.getElementById('mailBtn').onclick = () => {
     if(list) window.location.href = `mailto:?bcc=${list}&body=${encodeURIComponent(document.getElementById('mailBody').value)}`;
 };
 
-document.getElementById('dlBtn').onclick = () => {
-  const csv = DH.buildCsv(emails);
+function downloadCsv(csv, filename) {
   const link = document.createElement("a");
   link.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-  link.download = "DataHunter_v18.csv";
+  link.download = filename;
   link.click();
-};
+}
+
+document.getElementById('dlBtn').onclick = () => downloadCsv(DH.buildCsv(emails), "DataHunter_v18.csv");
+document.getElementById('dlCompanyBtn').onclick = () => downloadCsv(DH.buildCompanyCsv(emails), "DataHunter_Firmalar.csv");
 
 chrome.runtime.onMessage.addListener(m => m.type === "REFRESH_UI" && updateUI());
 updateUI();

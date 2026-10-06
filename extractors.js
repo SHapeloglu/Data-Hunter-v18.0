@@ -129,13 +129,32 @@ var DH = (() => {
     return /[;"\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   }
 
+  // Telefonlar ="+90..." olarak yazılır; böylece Excel sayıya çevirip başındaki + / 0'ı silmez.
+  const phoneCell = phones => phones.length ? `="${phones.map(p => String(p).replace(/[^\d+]/g, "")).join(" | ")}"` : "";
+
   function buildCsv(rows) {
-    // Telefonlar ="+90..." olarak yazılır; böylece Excel sayıya çevirip başındaki + / 0'ı silmez.
-    return "﻿Email;Tip;Kaynak;Tarih\n" + rows.map(e => [
-      e.type === "Telefon" ? `="${String(e.email).replace(/[^\d+]/g, "")}"` : csvCell(e.email),
-      csvCell(e.type), csvCell(e.source), csvCell(e.date)
+    return "\uFEFFEmail;Tip;Kaynak;Tarih;Firma;Sayfa\n" + rows.map(e => [
+      e.type === "Telefon" ? phoneCell([e.email]) : csvCell(e.email),
+      csvCell(e.type), csvCell(e.source), csvCell(e.date), csvCell(e.company), csvCell(e.page)
     ].join(";")).join("\n");
   }
 
-  return { normalizePhone, findPhonesInText, phoneFromHref, parseSocial, buildCsv };
+  // Firma başına tek satır: aynı firma adına düşen telefon/e-posta/web/sosyal değerler birleştirilir.
+  // Firması bulunamayan kayıtlar kendi satırlarında, Firma sütunu boş kalır.
+  function buildCompanyCsv(rows) {
+    const groups = new Map();
+    rows.forEach((e, i) => {
+      const key = e.company ? "f:" + e.company.toLocaleLowerCase("tr") : "r:" + i;
+      if (!groups.has(key)) groups.set(key, { company: e.company || "", tel: [], mail: [], web: [], social: [], page: e.page || e.source || "", date: e.date });
+      const g = groups.get(key);
+      const bucket = { "Telefon": g.tel, "E-Posta": g.mail, "Web Sitesi": g.web, "Sosyal Medya": g.social }[e.type];
+      if (bucket && !bucket.includes(e.email)) bucket.push(e.email);
+    });
+    return "\uFEFFFirma;Telefon;E-Posta;Web Sitesi;Sosyal Medya;Sayfa;Tarih\n" + Array.from(groups.values()).map(g => [
+      csvCell(g.company), phoneCell(g.tel), csvCell(g.mail.join(" | ")), csvCell(g.web.join(" | ")),
+      csvCell(g.social.join(" | ")), csvCell(g.page), csvCell(g.date)
+    ].join(";")).join("\n");
+  }
+
+  return { normalizePhone, findPhonesInText, phoneFromHref, parseSocial, buildCsv, buildCompanyCsv };
 })();
