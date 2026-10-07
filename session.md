@@ -2,6 +2,13 @@
 
 ---
 
+## 2026-10-07
+**Yapılanlar:** "Sadece telefonları göster" anahtarı eklendi (`onlyPhones`, yalnız görünüm; `onlyEmails` ile karşılıklı kapanır; sayaç "gösterilen / toplam"). Başsız Chromium'da test edildi.
+**Bağlam:** Aynı gün SMSMotoru (PHP toplu SMS paneli, ayrı depo) düzeltilip smsmotoru.bidanismanlik.com.tr'ye (DirectAdmin) kuruldu; Data Hunter Firma CSV'si oraya doğrudan içe aktarılabiliyor. SMS sağlayıcısıyla henüz anlaşılmadı.
+**Açık sorunlar:** Web adresi toplama `.js` kaynak dosyalarını da alıyor (task.md).
+
+---
+
 ## 2026-10-06
 **Yapılanlar:** Telefon + sosyal medya yakalama eklendi (`extractors.js` yeni ortak dosya). Ayarlar'a iki anahtar (`capturePhones`, `captureSocial`), listede TEL / platform rozetleri. Popup `innerHTML` → `textContent`. CSV tek fonksiyonda, kaçışlı; telefon `="+90…"` olarak yazılıyor (Excel baştaki +/0'ı silmesin). Toplu mailto artık yalnız e-postaları alıyor (önceden "Web Sitesi" dışındaki her şeyi alıyordu). Web sitesi için ✖ düğmesi `https:`'yi kara listeye ekliyordu, host'u ekleyecek şekilde düzeltildi.
 **Kararlar / neden:** Yeni türler varsayılan kapalı (KVKK). Sosyal hesaplar yalnız gerçek `<a href>` bağlantılarından, paylaş/intent/gönderi linkleri hariç. Telefon serbest metinde `innerText`'ten (script içi rakamlar yakalanmasın).

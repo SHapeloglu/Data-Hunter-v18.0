@@ -21,6 +21,7 @@ background.js ─┤ contextMenus "addManualEmail" (seçili metin)     ├─ ma
 | `emailData` | `[{email, type, source, date, company, page, platform?}]` — `type`: `"E-Posta"` / `"Web Sitesi"` / `"Telefon"` / `"Sosyal Medya"` (`platform` yalnız sosyalde) | `[]` | hepsi |
 | `isActive` | bool | true | content, popup |
 | `onlyEmails` | bool | false | content, popup |
+| `onlyPhones` | bool | false | popup (yalnız görünüm süzgeci; `onlyEmails` ile aynı anda açık olmaz) |
 | `domainFilter` | string | "" | content (e-postada `includes`) |
 | `blockedDomains` | string[] | [] | content, popup (eklerken mevcut eşleşenler listeden silinir) |
 | `scanSpeed` | string | "0" | sadece popup (kullanılmıyor) |

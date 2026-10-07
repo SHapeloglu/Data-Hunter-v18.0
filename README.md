@@ -6,6 +6,7 @@ Gezdiğiniz web sayfalarındaki **e-posta adreslerini** (isteğe bağlı olarak 
 
 - Sayfa açıldığında ve kaydırma durduğunda sayfa içeriğinden e-posta ve `mailto:` bağlantılarını toplar.
 - "Sadece e-posta" modu (web adreslerini atlar).
+- "Sadece telefonları göster" — listede yalnız telefonlar; sayaç "gösterilen / toplam" olur.
 - **Telefon numaraları** (Ayarlar'dan açılır, varsayılan kapalı) — `tel:` / WhatsApp bağlantıları ve sayfa metnindeki `+90 5xx…`, `0212 …`, `+44 …` gibi numaralar; `+905321234567` biçimine çevrilir.
 - **Firma eşleştirme** — üye rehberlerinde (tablo, kart veya firma detay sayfası) her telefon/e-posta/hesap, bulunduğu satırdaki firma adıyla kaydedilir. **📇 Firma CSV** firma başına tek satır verir: Firma; Telefon; E-Posta; Web Sitesi; Sosyal Medya; Sayfa.
 - **Sosyal medya hesapları** (Ayarlar'dan açılır, varsayılan kapalı) — Instagram, Facebook, X/Twitter, LinkedIn, YouTube, TikTok, Telegram profil bağlantıları (paylaş butonları hariç).
