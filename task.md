@@ -3,8 +3,6 @@
 ## 🔜 Sıradaki
 
 - [ ] **(kullanıcıdan bekleniyor)** Gerçek oda/dernek rehberlerinde firma adı boş/yanlış çıkan sayfa adresleri → `findRecord` kurallarını o yapılara göre genişlet
-- [ ] Web adresi toplamada `.js`/`.css` gibi kaynak dosyalarını atla (ör. google-analytics.js, maxcdn) — kullanıcı ekran görüntüsünde görüldü
-- [ ] `wa.me` linkleri telefonun yanında "Web Sitesi" olarak da düşüyor — telefon yakalama açıkken atla
 - [ ] Domain filtresini telefon/sosyal/firma için de anlamlı hale getir (ör. firma adında ara)
 - [ ] Telefon/sosyal yakalamayı gerçek sitelerde dene; yanlış pozitif görülürse `extractors.js` kurallarını sıkılaştır
 - [ ] `scanSpeed` ("vites") ayarını ya `content.js`'te uygula ya da arayüzden kaldır
@@ -16,6 +14,9 @@
 _(şu anda boş)_
 
 ## ✅ Tamamlanan
+
+- [x] 2026-10-07 — Ayarlar'a "Web adreslerini yakala"; web adresleri yalnız dış linklerden (.js/CDN/kendi site/harita/wa.me hariç)
+- [x] 2026-10-07 — "Sadece cep telefonlarını göster (05…)" süzgeci
 
 - [x] 2026-10-07 — "Sadece telefonları göster" anahtarı (popup görünüm süzgeci)
 

@@ -2,7 +2,7 @@
 
 ```
 Her sayfa ── extractors.js + content.js (yükleme + scroll debounce 1.5s)
-               │ regex: e-posta, mailto:, URL (onlyEmails kapalıysa)
+               │ regex: e-posta, mailto:; captureWeb: <a href> dış linkler (DH.normalizeWebUrl — kendi site, CDN, .js/.css, harita, sosyal hariç)
                │ capturePhones: tel:/wa.me linkleri + innerText'te telefon → "+90…" normalize
                │ captureSocial: <a href> profil linkleri (Instagram, Facebook, X, LinkedIn, YouTube, TikTok, Telegram)
                │ firma eşleştirme: değerin elemanından yukarı → <tr> / tekrarlayan kart → başlıktan firma adı
@@ -21,7 +21,9 @@ background.js ─┤ contextMenus "addManualEmail" (seçili metin)     ├─ ma
 | `emailData` | `[{email, type, source, date, company, page, platform?}]` — `type`: `"E-Posta"` / `"Web Sitesi"` / `"Telefon"` / `"Sosyal Medya"` (`platform` yalnız sosyalde) | `[]` | hepsi |
 | `isActive` | bool | true | content, popup |
 | `onlyEmails` | bool | false | content, popup |
-| `onlyPhones` | bool | false | popup (yalnız görünüm süzgeci; `onlyEmails` ile aynı anda açık olmaz) |
+| `onlyPhones` | bool | false | popup (görünüm süzgeci) |
+| `onlyMobiles` | bool | false | popup (görünüm süzgeci: yalnız `+905…`) — `onlyEmails`/`onlyPhones`/`onlyMobiles`'tan yalnız biri açık olur |
+| `captureWeb` | bool \| null | null | content, popup — web adresi toplama. `null` (eski kurulum) ise `!onlyEmails` sayılır; popup ilk açılışta bunu kalıcı yazar |
 | `domainFilter` | string | "" | content (e-postada `includes`) |
 | `blockedDomains` | string[] | [] | content, popup (eklerken mevcut eşleşenler listeden silinir) |
 | `scanSpeed` | string | "0" | sadece popup (kullanılmıyor) |

@@ -5,7 +5,8 @@
 ## 2026-10-07
 **Yapılanlar:** "Sadece telefonları göster" anahtarı eklendi (`onlyPhones`, yalnız görünüm; `onlyEmails` ile karşılıklı kapanır; sayaç "gösterilen / toplam"). Başsız Chromium'da test edildi.
 **Bağlam:** Aynı gün SMSMotoru (PHP toplu SMS paneli, ayrı depo) düzeltilip smsmotoru.bidanismanlik.com.tr'ye (DirectAdmin) kuruldu; Data Hunter Firma CSV'si oraya doğrudan içe aktarılabiliyor. SMS sağlayıcısıyla henüz anlaşılmadı.
-**Açık sorunlar:** Web adresi toplama `.js` kaynak dosyalarını da alıyor (task.md).
+**Ek:** Ayarlar'a "Web adreslerini yakala" (`captureWeb`) taşındı; web adresleri artık innerHTML regex'i yerine yalnız `<a href>` dış linklerden (`DH.normalizeWebUrl`), bu yüzden google-analytics.js/maxcdn gibi kayıtlar bitti. "Sadece cep telefonlarını göster (05…)" süzgeci eklendi; üç görünüm anahtarı karşılıklı kapanıyor. Eski kurulumlarda `onlyEmails` tercihi bir kez `captureWeb`'e taşınıyor.
+**Not:** Kullanıcının listesinde önceki sürümden kalan `.js` kayıtları kendiliğinden silinmez (✖ / Kara Liste ".js" / Listeyi Temizle).
 
 ---
 

@@ -11,28 +11,32 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 function updateUI() {
   chrome.storage.local.get({
-    emailData: [], isActive: true, onlyEmails: false, onlyPhones: false,
+    emailData: [], isActive: true, onlyEmails: false, onlyPhones: false, onlyMobiles: false,
     scanSpeed: "0", domainFilter: "", mailBody: "", blockedDomains: [],
     autoSaveActive: false, autoSaveInterval: 5, autoClearAfterSave: false,
-    capturePhones: false, captureSocial: false
+    capturePhones: false, captureSocial: false, captureWeb: null
   }, (res) => {
     emails = res.emailData;
-    const shown = res.onlyEmails ? emails.filter(i => i.type === "E-Posta").length
-                : res.onlyPhones ? emails.filter(i => i.type === "Telefon").length : emails.length;
+    const shown = emails.filter(viewFilter(res)).length;
     document.getElementById('totalCount').innerText = shown === emails.length ? emails.length : `${shown} / ${emails.length}`;
     document.getElementById('activeStatus').checked = res.isActive;
     document.getElementById('onlyEmailsStatus').checked = res.onlyEmails;
     document.getElementById('onlyPhonesStatus').checked = res.onlyPhones;
+    document.getElementById('onlyMobilesStatus').checked = res.onlyMobiles;
     document.getElementById('vites').value = res.scanSpeed;
     document.getElementById('domainFilter').value = res.domainFilter;
     document.getElementById('mailBody').value = res.mailBody;
     document.getElementById('autoSaveActive').checked = res.autoSaveActive;
     document.getElementById('autoSaveInterval').value = res.autoSaveInterval;
     document.getElementById('autoClearAfterSave').checked = res.autoClearAfterSave;
+    // Eski sürümde web toplamayı "Sadece mailleri göster" yönetiyordu; o tercih bir kez captureWeb'e taşınır,
+    // böylece mail anahtarı bundan sonra yalnız görünümü süzer.
+    if (res.captureWeb === null) chrome.storage.local.set({ captureWeb: !res.onlyEmails });
+    document.getElementById('captureWeb').checked = res.captureWeb ?? !res.onlyEmails;
     document.getElementById('capturePhones').checked = res.capturePhones;
     document.getElementById('captureSocial').checked = res.captureSocial;
     
-    renderHunter(emails, res.onlyEmails, res.onlyPhones);
+    renderHunter(emails, viewFilter(res));
     renderBlacklist(res.blockedDomains);
   });
 }
@@ -44,10 +48,18 @@ const BADGES = {
   "Sosyal Medya": { label: "SOSYAL", color: "#1e88e5" }
 };
 
-function renderHunter(data, onlyEmailsActive, onlyPhonesActive) {
+// Avcı listesindeki görünüm süzgeçleri (yalnız biri açık olur). Cep: TR mobil numaralar +905… olarak kayıtlı.
+const isMobile = item => item.type === "Telefon" && item.email.startsWith("+905");
+function viewFilter(res) {
+  if (res.onlyEmails) return item => item.type === "E-Posta";
+  if (res.onlyMobiles) return isMobile;
+  if (res.onlyPhones) return item => item.type === "Telefon";
+  return () => true;
+}
+
+function renderHunter(data, filter) {
   const div = document.getElementById('listE');
-  let displayData = onlyEmailsActive ? data.filter(item => item.type === "E-Posta")
-                  : onlyPhonesActive ? data.filter(item => item.type === "Telefon") : [...data];
+  let displayData = data.filter(filter);
   div.innerHTML = displayData.length ? "" : "<p style='text-align:center;color:#999;font-size:11px;'>Liste Boş</p>";
   displayData.reverse().forEach(item => {
     const el = document.createElement('div');
@@ -167,13 +179,20 @@ document.getElementById('autoClearAfterSave').onchange = (e) => {
   chrome.storage.local.set({ autoClearAfterSave: e.target.checked });
 };
 
+document.getElementById('captureWeb').onchange = (e) => chrome.storage.local.set({ captureWeb: e.target.checked });
 document.getElementById('capturePhones').onchange = (e) => chrome.storage.local.set({ capturePhones: e.target.checked });
 document.getElementById('captureSocial').onchange = (e) => chrome.storage.local.set({ captureSocial: e.target.checked });
 
 document.getElementById('activeStatus').onchange = (e) => chrome.storage.local.set({ isActive: e.target.checked });
-document.getElementById('onlyEmailsStatus').onchange = (e) => chrome.storage.local.set({ onlyEmails: e.target.checked, ...(e.target.checked && { onlyPhones: false }) }, () => updateUI());
-// Yalnız görünümü süzer (onlyEmails'ten farklı olarak toplamayı etkilemez); iki anahtar aynı anda açık olmaz
-document.getElementById('onlyPhonesStatus').onchange = (e) => chrome.storage.local.set({ onlyPhones: e.target.checked, ...(e.target.checked && { onlyEmails: false }) }, () => updateUI());
+// Görünüm anahtarları: biri açılınca diğerleri kapanır
+const VIEW_KEYS = { onlyEmailsStatus: "onlyEmails", onlyPhonesStatus: "onlyPhones", onlyMobilesStatus: "onlyMobiles" };
+Object.entries(VIEW_KEYS).forEach(([id, key]) => {
+  document.getElementById(id).onchange = (e) => {
+    const update = { [key]: e.target.checked };
+    if (e.target.checked) Object.values(VIEW_KEYS).filter(k => k !== key).forEach(k => update[k] = false);
+    chrome.storage.local.set(update, () => updateUI());
+  };
+});
 ['vites', 'domainFilter', 'mailBody'].forEach(id => {
   document.getElementById(id).oninput = (e) => chrome.storage.local.set({ [id === 'vites' ? 'scanSpeed' : id]: e.target.value });
 });

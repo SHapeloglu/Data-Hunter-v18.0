@@ -65,7 +65,8 @@ function locateValues(emailRegEx, wantPhones, wantSocial) {
     if (href.startsWith("mailto:")) put(href.slice(7).split("?")[0].trim().toLowerCase(), a);
     if (wantPhones) put(DH.phoneFromHref(href), a);
     if (wantSocial) { const s = DH.parseSocial(href); if (s) put(s.value, a); }
-    if (/^https?:/i.test(href)) put("web:" + href.toLowerCase().replace(/\/+$/, ""), a);
+    const web = DH.normalizeWebUrl(href, location.hostname);
+    if (web) put("web:" + web.replace(/\/+$/, ""), a);
   }
   if (!document.body) return map;
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -88,6 +89,7 @@ async function captureData() {
   chrome.storage.local.get({
     isActive: true, 
     onlyEmails: false, 
+    captureWeb: null,
     domainFilter: "", 
     blockedDomains: [],
     capturePhones: false,
@@ -102,7 +104,6 @@ async function captureData() {
 
     const pageTitle = document.title || "Sayfa";
     const emailRegEx = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-    const urlRegEx = /(www\.[a-zA-Z0-9.-]+\.[a-z]{2,}|https?:\/\/[^\s"'<>]+)/gi;
 
     const htmlContent = document.documentElement.innerHTML;
     let foundEmails = htmlContent.match(emailRegEx) || [];
@@ -118,7 +119,16 @@ async function captureData() {
       }
     }
 
-    const foundUrls = status.onlyEmails ? [] : (htmlContent.match(urlRegEx) || []);
+    // Web siteleri yalnız gerçek linklerden (<a href>); sayfa kodundaki script/CSS adresleri ve sitenin kendi sayfaları alınmaz.
+    // captureWeb hiç ayarlanmamışsa eski davranış: "Sadece mailleri göster" kapalıysa topla.
+    const captureWeb = status.captureWeb ?? !status.onlyEmails;
+    const foundUrls = [];
+    if (captureWeb) {
+      for (let i = 0; i < allLinks.length; i++) {
+        const w = DH.normalizeWebUrl(allLinks[i].href, currentHost);
+        if (w && !foundUrls.includes(w)) foundUrls.push(w);
+      }
+    }
 
     // Telefon: tel:/WhatsApp linkleri + görünür metin (innerHTML'deki script/ID rakamlarını atlamak için innerText)
     let foundPhones = [];
@@ -183,15 +193,8 @@ async function captureData() {
       });
 
       foundUrls.forEach(url => {
-        let cleanUrl = url.toLowerCase().trim().replace(/[.,;:"'<>]$/g, "");
-        const isBlocked = status.blockedDomains.some(d => cleanUrl.includes(d));
-        
-        // Sosyal medya yakalama açıksa o profiller "Web Sitesi" olarak ikinci kez eklenmesin
-        const isSocial = status.captureSocial && DH.parseSocial(cleanUrl);
-        
-        if (!cleanUrl.includes("@") && !isBlocked && !isSocial) {
-          addEntry(cleanUrl, "Web Sitesi", company("web:" + cleanUrl.replace(/\/+$/, "")));
-        }
+        const isBlocked = status.blockedDomains.some(d => url.includes(d));
+        if (!isBlocked) addEntry(url, "Web Sitesi", company("web:" + url.replace(/\/+$/, "")));
       });
 
       foundPhones.forEach(phone => {

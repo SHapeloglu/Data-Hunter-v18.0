@@ -122,6 +122,25 @@ var DH = (() => {
     return null;
   }
 
+  // --- WEB SİTESİ ---
+  // Firma sitesi olamayacak adresler: harita/WhatsApp, CDN ve kod kütüphaneleri, paylaşım servisleri, sosyal ağlar
+  // (sosyal hesaplar "Sosyal medya" türünde ayrıca yakalanır)
+  const SKIP_HOSTS = /(^|\.)(google\.[a-z.]+|goo\.gl|g\.page|wa\.me|whatsapp\.com|apple\.com|youtube\.com|youtu\.be|facebook\.com|fb\.com|instagram\.com|twitter\.com|x\.com|linkedin\.com|tiktok\.com|t\.me|telegram\.me|w3\.org|schema\.org|gstatic\.com|googleapis\.com|googletagmanager\.com|cloudflare\.com|jsdelivr\.net|maxcdn\.com|bootstrapcdn\.com|addthis\.com|sharethis\.com)$/;
+  const ASSET_EXT = /\.(js|css|json|xml|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot|pdf|docx?|xlsx?|zip|rar|mp4|mp3)$/i;
+
+  // <a href> adresini kayıt değerine çevirir ("https://firma.com/"); firma sitesi değilse null.
+  // pageHost verilirse sitenin kendi sayfalarına (ve alt alan adlarına) giden linkler atlanır.
+  function normalizeWebUrl(href, pageHost) {
+    let u;
+    try { u = new URL(href); } catch (e) { return null; }
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    const host = u.hostname.toLowerCase().replace(/^www\./, "");
+    const page = (pageHost || "").toLowerCase().replace(/^www\./, "");
+    if (page && (host === page || host.endsWith("." + page) || page.endsWith("." + host))) return null;
+    if (SKIP_HOSTS.test(host) || ASSET_EXT.test(u.pathname)) return null;
+    return (u.origin + u.pathname).toLowerCase();   // ?utm=... gibi parametreler atılır
+  }
+
   // --- CSV (popup + otomatik yedek aynı fonksiyonu kullanır) ---
   function csvCell(v) {
     let s = String(v == null ? "" : v);
@@ -156,5 +175,5 @@ var DH = (() => {
     ].join(";")).join("\n");
   }
 
-  return { normalizePhone, findPhonesInText, phoneFromHref, parseSocial, buildCsv, buildCompanyCsv };
+  return { normalizePhone, findPhonesInText, phoneFromHref, parseSocial, normalizeWebUrl, buildCsv, buildCompanyCsv };
 })();
