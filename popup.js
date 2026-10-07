@@ -11,15 +11,18 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 function updateUI() {
   chrome.storage.local.get({
-    emailData: [], isActive: true, onlyEmails: false,
+    emailData: [], isActive: true, onlyEmails: false, onlyPhones: false,
     scanSpeed: "0", domainFilter: "", mailBody: "", blockedDomains: [],
     autoSaveActive: false, autoSaveInterval: 5, autoClearAfterSave: false,
     capturePhones: false, captureSocial: false
   }, (res) => {
     emails = res.emailData;
-    document.getElementById('totalCount').innerText = emails.length;
+    const shown = res.onlyEmails ? emails.filter(i => i.type === "E-Posta").length
+                : res.onlyPhones ? emails.filter(i => i.type === "Telefon").length : emails.length;
+    document.getElementById('totalCount').innerText = shown === emails.length ? emails.length : `${shown} / ${emails.length}`;
     document.getElementById('activeStatus').checked = res.isActive;
     document.getElementById('onlyEmailsStatus').checked = res.onlyEmails;
+    document.getElementById('onlyPhonesStatus').checked = res.onlyPhones;
     document.getElementById('vites').value = res.scanSpeed;
     document.getElementById('domainFilter').value = res.domainFilter;
     document.getElementById('mailBody').value = res.mailBody;
@@ -29,7 +32,7 @@ function updateUI() {
     document.getElementById('capturePhones').checked = res.capturePhones;
     document.getElementById('captureSocial').checked = res.captureSocial;
     
-    renderHunter(emails, res.onlyEmails);
+    renderHunter(emails, res.onlyEmails, res.onlyPhones);
     renderBlacklist(res.blockedDomains);
   });
 }
@@ -41,10 +44,11 @@ const BADGES = {
   "Sosyal Medya": { label: "SOSYAL", color: "#1e88e5" }
 };
 
-function renderHunter(data, onlyEmailsActive) {
+function renderHunter(data, onlyEmailsActive, onlyPhonesActive) {
   const div = document.getElementById('listE');
-  div.innerHTML = data.length ? "" : "<p style='text-align:center;color:#999;font-size:11px;'>Liste Boş</p>";
-  let displayData = onlyEmailsActive ? data.filter(item => item.type === "E-Posta") : [...data];
+  let displayData = onlyEmailsActive ? data.filter(item => item.type === "E-Posta")
+                  : onlyPhonesActive ? data.filter(item => item.type === "Telefon") : [...data];
+  div.innerHTML = displayData.length ? "" : "<p style='text-align:center;color:#999;font-size:11px;'>Liste Boş</p>";
   displayData.reverse().forEach(item => {
     const el = document.createElement('div');
     el.className = 'item';
@@ -167,7 +171,9 @@ document.getElementById('capturePhones').onchange = (e) => chrome.storage.local.
 document.getElementById('captureSocial').onchange = (e) => chrome.storage.local.set({ captureSocial: e.target.checked });
 
 document.getElementById('activeStatus').onchange = (e) => chrome.storage.local.set({ isActive: e.target.checked });
-document.getElementById('onlyEmailsStatus').onchange = (e) => chrome.storage.local.set({ onlyEmails: e.target.checked }, () => updateUI());
+document.getElementById('onlyEmailsStatus').onchange = (e) => chrome.storage.local.set({ onlyEmails: e.target.checked, ...(e.target.checked && { onlyPhones: false }) }, () => updateUI());
+// Yalnız görünümü süzer (onlyEmails'ten farklı olarak toplamayı etkilemez); iki anahtar aynı anda açık olmaz
+document.getElementById('onlyPhonesStatus').onchange = (e) => chrome.storage.local.set({ onlyPhones: e.target.checked, ...(e.target.checked && { onlyEmails: false }) }, () => updateUI());
 ['vites', 'domainFilter', 'mailBody'].forEach(id => {
   document.getElementById(id).oninput = (e) => chrome.storage.local.set({ [id === 'vites' ? 'scanSpeed' : id]: e.target.value });
 });
