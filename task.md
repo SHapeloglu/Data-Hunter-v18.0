@@ -2,7 +2,9 @@
 
 ## 🔜 Sıradaki
 
-- [ ] Firma eşleştirmeyi gerçek oda/dernek rehberlerinde dene; tutmayan site yapılarına göre `findRecord` kurallarını genişlet
+- [ ] **(kullanıcıdan bekleniyor)** Gerçek oda/dernek rehberlerinde firma adı boş/yanlış çıkan sayfa adresleri → `findRecord` kurallarını o yapılara göre genişlet
+- [ ] `wa.me` linkleri telefonun yanında "Web Sitesi" olarak da düşüyor — telefon yakalama açıkken atla
+- [ ] Domain filtresini telefon/sosyal/firma için de anlamlı hale getir (ör. firma adında ara)
 - [ ] Telefon/sosyal yakalamayı gerçek sitelerde dene; yanlış pozitif görülürse `extractors.js` kurallarını sıkılaştır
 - [ ] `scanSpeed` ("vites") ayarını ya `content.js`'te uygula ya da arayüzden kaldır
 - [ ] `content.7z` arşivini repodan çıkar
