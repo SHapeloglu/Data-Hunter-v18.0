@@ -49,6 +49,10 @@
         <span style="font-size: 11px; font-weight: bold;">SADECE TELEFONLARI GÖSTER</span>
         <label class="switch"><input type="checkbox" id="onlyPhonesStatus"><span class="slider"></span></label>
     </div>
+    <div class="card" style="display: flex; justify-content: space-between; align-items: center; padding: 8px;">
+        <span style="font-size: 11px; font-weight: bold;">SADECE CEP TELEFONLARINI GÖSTER (05…)</span>
+        <label class="switch"><input type="checkbox" id="onlyMobilesStatus"><span class="slider"></span></label>
+    </div>
     <div class="status-bar">
         <span>Kayıt: <span id="totalCount" style="font-weight:bold; color:#673ab7;">0</span></span>
         <select id="vites" style="width:60px; margin:0;"><option value="0">V0</option><option value="1">V1</option><option value="2">V2</option></select>
@@ -80,6 +84,10 @@
     <div class="card">
       <div style="font-size: 12px; font-weight: bold; color: #673ab7; margin-bottom: 8px;">EK VERİ TÜRLERİ</div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-size: 11px;">🌐 Web adreslerini yakala</span>
+        <label class="switch"><input type="checkbox" id="captureWeb"><span class="slider"></span></label>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
         <span style="font-size: 11px;">📞 Telefon numaralarını yakala</span>
         <label class="switch"><input type="checkbox" id="capturePhones"><span class="slider"></span></label>
       </div>
@@ -87,7 +95,7 @@
         <span style="font-size: 11px;">👥 Sosyal medya hesaplarını yakala</span>
         <label class="switch"><input type="checkbox" id="captureSocial"><span class="slider"></span></label>
       </div>
-      <div style="font-size: 10px; color: #888; margin-top: 8px;">Varsayılan kapalı. Telefon ve hesaplar kişisel veridir (KVKK/GDPR); izinsiz arama/SMS/ileti için kullanmayın.</div>
+      <div style="font-size: 10px; color: #888; margin-top: 8px;">Telefon ve sosyal medya varsayılan kapalı. Web adresleri yalnız sayfadaki gerçek linklerden alınır (sitenin kendi sayfaları hariç). Telefon ve hesaplar kişisel veridir (KVKK/GDPR); izinsiz arama/SMS/ileti için kullanmayın.</div>
     </div>
     <div class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
